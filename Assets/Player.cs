@@ -17,7 +17,8 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask ground;
     private bool isGrounded = true;
 
-    private bool isMoving = false;
+    private bool canMove = true;
+    private bool canJump = true;
 
     private void Awake()
     {
@@ -25,10 +26,6 @@ public class Player : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
     }
 
-    private void Start()
-    {
-
-    }
     // Update is called once per frame
     void Update()
     {
@@ -36,8 +33,6 @@ public class Player : MonoBehaviour
         InputHandle();
         AnimationHandle();
         FlipHandle();
-
-
     }
 
     private void InputHandle()
@@ -46,13 +41,25 @@ public class Player : MonoBehaviour
         Move();
 
         if (Input.GetKeyDown(KeyCode.Space))
-            Jump();
+            TryToJump();
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+            TryToAttack();
     }
     private void AnimationHandle()
     {
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("yVelocity", rb.velocity.y);
         anim.SetFloat("xVelocity", rb.velocity.x);
+    }
+
+    private void TryToAttack()
+    {
+        if (isGrounded)
+        {
+            anim.SetTrigger("attack");
+            rb.velocity = new Vector2(0, rb.velocity.y);
+        }
     }
 
     private void FlipHandle()
@@ -69,22 +76,15 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
-        
-        if (rb.velocity.x != 0)
-        {
-            isMoving = true;
-        }
+        if (canMove)
+            rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
         else
-        {
-            isMoving = false;
-        }
-        
+            rb.velocity = new Vector2(0, rb.velocity.y);
     }
 
-    private void Jump()
+    private void TryToJump()
     {
-        if (isGrounded)
+        if (isGrounded && canJump)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
@@ -99,5 +99,13 @@ public class Player : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, transform.position + new Vector3(0, -groundCheckDis));
+    }
+
+
+    public void EnableMoveAndJump(bool enable)
+    {
+        // Debug.Log("EnableMoveAndJump called");
+        canMove = enable;
+        canJump = enable;
     }
 }
