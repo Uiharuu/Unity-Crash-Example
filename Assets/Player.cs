@@ -11,11 +11,12 @@ public class Player : MonoBehaviour
     private float xInput;
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private int jumpForce = 8;
-    [SerializeField] private bool facingRight = true;
+    private bool facingRight = true;
 
     [SerializeField] private float groundCheckDis = 1.4f;
-    [SerializeField] private bool isGrounded = true;
     [SerializeField] private LayerMask ground;
+    private bool isGrounded = true;
+
     private bool isMoving = false;
 
     private void Awake()
@@ -32,24 +33,40 @@ public class Player : MonoBehaviour
     void Update()
     {
         CollisionCheck();
+        InputHandle();
+        AnimationHandle();
+        FlipHandle();
+
+
+    }
+
+    private void InputHandle()
+    {
         xInput = Input.GetAxisRaw("Horizontal");
         Move();
 
         if (Input.GetKeyDown(KeyCode.Space))
             Jump();
+    }
+    private void AnimationHandle()
+    {
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("yVelocity", rb.velocity.y);
+        anim.SetFloat("xVelocity", rb.velocity.x);
+    }
 
+    private void FlipHandle()
+    {
         if (rb.velocity.x > 0 && facingRight == false)
             Flip();
         else if (rb.velocity.x < 0 && facingRight == true)
             Flip();
-
-
     }
-
     private void CollisionCheck()
     {
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDis, ground);
     }
+
     private void Move()
     {
         rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
@@ -62,7 +79,7 @@ public class Player : MonoBehaviour
         {
             isMoving = false;
         }
-        anim.SetBool("isMoving", isMoving);
+        
     }
 
     private void Jump()
