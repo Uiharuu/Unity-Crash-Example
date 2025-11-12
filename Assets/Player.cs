@@ -7,6 +7,10 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
+    [Header("Attack details")]
+    [SerializeField] private float attackRadius;
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private LayerMask whatIsEnemy;
 
     private float xInput;
     [SerializeField] private float moveSpeed = 3.5f;
@@ -33,6 +37,15 @@ public class Player : MonoBehaviour
         InputHandle();
         AnimationHandle();
         FlipHandle();
+    }
+    public void AttackEnemy()
+    {
+        Collider2D[] enemyColliders = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, whatIsEnemy);
+
+        foreach (Collider2D enemy in enemyColliders)
+        {
+            enemy.GetComponent<Enemy>().TakeDamage();
+        }
     }
 
     private void InputHandle()
@@ -99,6 +112,7 @@ public class Player : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, transform.position + new Vector3(0, -groundCheckDis));
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 
 
